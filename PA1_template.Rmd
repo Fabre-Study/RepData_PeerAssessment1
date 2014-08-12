@@ -34,7 +34,7 @@ head(my.result)
 
 Histogram with the total number of steps taken each day (no missing values).
 
-```{r,echo=TRUE}
+```{r Plot1_Mean_Total_Steps,echo=TRUE,fig.width=5,fig.height=4,message=FALSE}
 my.histogram <- aggregate(x=my.result$steps, by=list(my.result$date), FUN=sum, na.rm=TRUE)
 names(my.histogram) <- c("date","steps")
 library(ggplot2)
@@ -58,7 +58,7 @@ median(my.histogram$steps)
 Histogram with the total number of steps taken each day (no missing values).
 Create a new dataset with the aggregated data and plot the result.
 
-```{r,echo=TRUE}
+```{r Plot2_Average_Daily,echo=TRUE,fig.width=5,fig.height=4,message=FALSE}
 my.average.time <- aggregate(x=my.result$steps, by=list(my.result$interval), FUN=mean, na.rm=TRUE)
 names(my.average.time) <- c("interval","steps")
 qplot(x=my.average.time$interval, y=my.average.time$steps, xlab="Interval (5min)", ylab="Steps", stat = "identity", geom="line")
@@ -100,7 +100,7 @@ names(my.histogram.imput) <- c("date","steps")
 ```
 
 Make a histogram of the total number of steps taken each day. 
-```{r,echo=TRUE}
+```{r Plot3_Imput_Missing,echo=TRUE,fig.width=5,fig.height=4,message=FALSE}
 library(ggplot2)
 qplot(x=my.histogram.imput$date, y=my.histogram.imput$steps, xlab="Date", ylab="Steps", stat = "identity", geom="bar")
 ```
@@ -137,7 +137,7 @@ names(my.result.dayweek) <- c("dayweek","interval","steps")
 ```
 
 Create a plot containing a time series plot (geom_line) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
-```{r}
+```{r Plot4_Weekdays,echo=TRUE,fig.width=5,fig.height=4,message=FALSE}
 ggplot(my.result.dayweek, aes(interval, steps)) + geom_line() + xlab("Interval") + ylab("Mean number of steps") + facet_grid(. ~ dayweek)
 ```
 

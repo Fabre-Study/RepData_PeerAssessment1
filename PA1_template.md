@@ -13,62 +13,96 @@ output: html_document
 
 Unzip and Read the data from "activity.csv"
 
-```{r,echo=TRUE}
+
+```r
 unzip("repdata_data_activity.zip")
 my.result <- read.csv("activity.csv")
 ```
 
 Convert the class of the date.
 
-```{r,echo=TRUE}
+
+```r
 my.result$date <- as.Date(my.result$date)
 ```
 
 Show the head of the dateset loaded.
 
-```{r,echo=TRUE}
+
+```r
 head(my.result)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 
 ## What is mean total number of steps taken per day?
 
 Histogram with the total number of steps taken each day (no missing values).
 
-```{r,echo=TRUE}
+
+```r
 my.histogram <- aggregate(x=my.result$steps, by=list(my.result$date), FUN=sum, na.rm=TRUE)
 names(my.histogram) <- c("date","steps")
 library(ggplot2)
 qplot(x=my.histogram$date, y=my.histogram$steps, xlab="Date", ylab="Steps", stat = "identity", geom="bar")
 ```
 
+![plot of chunk Plot1_Mean_Total_Steps](figure/Plot1_Mean_Total_Steps.png) 
+
 Reporting **mean** and **median** of toyal number of steps taken per day.
 
 **Mean**
-```{r,echo=TRUE}
+
+```r
 mean(my.histogram$steps)
 ```
 
+```
+## [1] 9354
+```
+
 **Median**
-```{r,echo=TRUE}
+
+```r
 median(my.histogram$steps)
-````
+```
+
+```
+## [1] 10395
+```
 
 ## What is the average daily activity pattern?
 
 Histogram with the total number of steps taken each day (no missing values).
 Create a new dataset with the aggregated data and plot the result.
 
-```{r,echo=TRUE}
+
+```r
 my.average.time <- aggregate(x=my.result$steps, by=list(my.result$interval), FUN=mean, na.rm=TRUE)
 names(my.average.time) <- c("interval","steps")
 qplot(x=my.average.time$interval, y=my.average.time$steps, xlab="Interval (5min)", ylab="Steps", stat = "identity", geom="line")
 ```
 
+![plot of chunk Plot2_Average_Daily](figure/Plot2_Average_Daily.png) 
+
 Which 5-minute interval, contains the maximum number of steps?
 
 **5 minutes interval**
-```{r,echo=TRUE}
+
+```r
 which.max(my.average.time$steps)
+```
+
+```
+## [1] 104
 ```
 
 ## Imputing missing values
@@ -76,15 +110,28 @@ which.max(my.average.time$steps)
 Total number of missing values in the dataset (dataset and steps)
 
 **Missing values**
-```{r,echo=TRUE}
+
+```r
 sum(is.na(my.result))
+```
+
+```
+## [1] 2304
+```
+
+```r
 sum(is.na(my.result$steps))
+```
+
+```
+## [1] 2304
 ```
 
 Strategy for filling in all of the missing values in the dataset. As suggested in the PA-1, it was used the mean for that 5-minute interval.
 
 Merge the original dataset with "mean that 5-minute interval", and fill the missing values.
-```{r,echo=TRUE}
+
+```r
 my.result.imput <- merge(my.result, my.average.time, by.x="interval", by.y="interval")
 
 my.result.imput$steps.x <-ifelse(is.na(my.result.imput$steps.x), my.result.imput$steps.y, my.result.imput$steps.x)
@@ -94,28 +141,42 @@ names(my.result.imput) <- c("steps","date","interval")
 ```
 
 Create a new dataset that is equal to the original dataset.
-```{r,echo=TRUE}
+
+```r
 my.histogram.imput <- aggregate(x=my.result.imput$steps, by=list(my.result.imput$date), FUN=sum, na.rm=TRUE)
 names(my.histogram.imput) <- c("date","steps")
 ```
 
 Make a histogram of the total number of steps taken each day. 
-```{r,echo=TRUE}
+
+```r
 library(ggplot2)
 qplot(x=my.histogram.imput$date, y=my.histogram.imput$steps, xlab="Date", ylab="Steps", stat = "identity", geom="bar")
 ```
 
+![plot of chunk Plot3_Imput_Missing](figure/Plot3_Imput_Missing.png) 
+
 Reporting **mean** and **median** of toyal number of steps taken per day.
 
 **Mean**
-```{r,echo=TRUE}
+
+```r
 mean(my.histogram.imput$steps)
 ```
 
+```
+## [1] 10766
+```
+
 **Median**
-```{r,echo=TRUE}
+
+```r
 median(my.histogram.imput$steps)
-````
+```
+
+```
+## [1] 10766
+```
 
 The final result (mean and median) is different of the estimates used in the first part of this assessment. The main impact of imputing missing data is to make the mean and median closer.
 
@@ -123,13 +184,19 @@ The final result (mean and median) is different of the estimates used in the fir
 
 Set the regional setting for create the "weekday" and "weekend" indicator.
 I am not from a country that use English regional setting.
-```{r}
+
+```r
 Sys.setlocale("LC_TIME","C")
+```
+
+```
+## [1] "C"
 ```
 
 Create a variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day. Aggredate the final result.
 
-```{r}
+
+```r
 my.result$dayweek <- factor(ifelse(weekdays(as.Date(my.result$date)) %in% c("Saturday", "Sunday"),"weekend","weekday"))
 
 my.result.dayweek <- aggregate(x=my.result$steps, by=list(my.result$dayweek, my.result$interval), FUN=mean, na.rm=TRUE)
@@ -137,8 +204,11 @@ names(my.result.dayweek) <- c("dayweek","interval","steps")
 ```
 
 Create a plot containing a time series plot (geom_line) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
-```{r}
+
+```r
 ggplot(my.result.dayweek, aes(interval, steps)) + geom_line() + xlab("Interval") + ylab("Mean number of steps") + facet_grid(. ~ dayweek)
 ```
+
+![plot of chunk Plot4_Weekdays](figure/Plot4_Weekdays.png) 
 
 ##---------------------------------------------------------------------------
